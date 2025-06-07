@@ -1,0 +1,38 @@
+/** @format */
+
+// src/hooks/useSensorData.js
+import { useState, useEffect } from "react";
+
+export const useSensorData = (isLive, isMockAPI) => {
+  const [sensorData, setSensorData] = useState([]);
+
+  useEffect(() => {
+    if (!isLive) return;
+
+    fetch("http://localhost:5000/live-data") // replace with actual endpoint
+      .then((res) => res.json())
+      .then((data) => {
+        setSensorData(data);
+
+        if (isMockAPI) {
+          const interval = setInterval(() => {
+            const mutatedData = data.map((item) => {
+              const sign = Math.random() > 0.5 ? 1 : -1;
+              return {
+                ...item,
+                x: item.x + sign * 5,
+                y: item.y + sign * 5,
+                z: item.z + sign * 5,
+              };
+            });
+            setSensorData(mutatedData);
+          }, 2000);
+
+          return () => clearInterval(interval);
+        }
+      })
+      .catch((err) => console.error("API fetch failed:", err));
+  }, [isLive, isMockAPI]);
+
+  return sensorData;
+};

@@ -1,0 +1,31 @@
+.toggle-tabs {
+  display: inline-flex;
+  background-color: #dcdcdc;
+  border-radius: 9999px;
+  padding: 4px;
+  margin: 20px auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tab-button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 9999px;
+  background-color: transparent;
+  color: #000;
+  font-weight: bold;
+    font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.5s ease-out;
+}
+
+.tab-button.active {
+  background-color: rgba(75,192,192,1);
+  color: black;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+}
+
+/* .tab-button:hover {
+  background-color: #f0f0f0;
+} */
