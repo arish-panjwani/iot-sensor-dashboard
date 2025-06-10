@@ -14,6 +14,7 @@ function SensorDropdown({ selectedSensor, setSelectedSensor }) {
         onChange={(e) => setSelectedSensor(e.target.value)}>
         <option value="accelerometer">Accelerometer</option>
         <option value="gyroscope">Gyroscope</option>
+        <option value="gps">GPS</option>
       </select>
     </div>
   );

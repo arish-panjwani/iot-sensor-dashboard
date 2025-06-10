@@ -1,5 +1,5 @@
 /** @format */
-
+ 
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import SensorDropdown from "./components/SensorDropdown";
@@ -10,82 +10,70 @@ import generateLiveData from "./utils/generateLiveData";
 import "./App.css";
 import SegmentedTabs from "./components/SegmentedTabs"; // at the top
 import { fetchPastData, fetchLiveData } from "./utils/api";
-
+ 
 function App() {
   const [sensorType, setSensorType] = useState("accelerometer");
   const [isLive, setIsLive] = useState(false);
   const [liveData, setLiveData] = useState(generateLiveData("accelerometer")); // ✅ initialize with default
-
+ 
   // 🔁 Live Data Generator — runs on sensor change or live toggle
   useEffect(() => {
     if (!isLive) return;
-
+ 
     // Generate first batch immediately when sensor changes
     setLiveData(generateLiveData(sensorType));
-
+ 
     // Then set interval
     const interval = setInterval(() => {
       const newData = generateLiveData(sensorType);
       setLiveData(newData);
     }, 2000);
-
+ 
     // Clear interval on unmount or sensorType/isLive change
     return () => clearInterval(interval);
   }, [isLive, sensorType]);
-
+ 
   const handleSwitchChange = () => setIsLive((prev) => !prev);
-
+ 
   // 🔄 Select live or static data dynamically
   const sensorData = isLive ? liveData : mockSensorData[sensorType];
-
+ 
   // For PAST (static) data
   useEffect(() => {
     if (isLive) return;
-
+ 
     const getPastData = async () => {
       const data = await fetchPastData(sensorType);
       setLiveData(data);
     };
-
+ 
     getPastData();
   }, [sensorType, isLive]);
-
+ 
   // For LIVE data (poll every 2 seconds)
   useEffect(() => {
     if (!isLive) return;
-
+ 
     const interval = setInterval(async () => {
       const data = await fetchLiveData(sensorType);
       setLiveData(data);
     }, 2000);
-
+ 
     return () => clearInterval(interval);
   }, [sensorType, isLive]);
-
+ 
   return (
     <Router>
       <div className="App">
         <h1>IoT Sensor Dashboard</h1>
-
+ 
         {/* Dropdown + Live Toggle */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "1rem",
-          }}>
+        <div className="control-bar">
           <SensorDropdown
             selectedSensor={sensorType}
             setSelectedSensor={setSensorType}
           />
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              color: "white",
-            }}>
+          <label className="live-toggle">
             <span>Show Live Data</span>
             <input
               type="checkbox"
@@ -95,7 +83,7 @@ function App() {
             />
           </label>
         </div>
-
+ 
         {/* Navigation */}
         {/* <div
           style={{
@@ -114,14 +102,14 @@ function App() {
             <Link to="/">Dashboard</Link> || <Link to="/data">All Data</Link>
           </nav>
         </div> */}
-
+ 
         <SegmentedTabs
           tabs={[
             { label: "Dashboard", path: "/" },
             { label: "All Data", path: "/data" },
           ]}
         />
-
+ 
         {/* Routes */}
         <Routes>
           <Route
@@ -143,5 +131,5 @@ function App() {
     </Router>
   );
 }
-
+ 
 export default App;
