@@ -1,20 +1,19 @@
 /** @format */
 
-import React from "react";
-import { Bar, Line, Radar, Doughnut } from "react-chartjs-2";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
   ArcElement,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  LineElement,
   PointElement,
   RadialLinearScale,
   Tooltip,
-  Legend,
 } from "chart.js";
-import { formatTimestamp } from "../utils/helper";
+import { Bar, Doughnut, Line, Radar } from "react-chartjs-2";
+import { getFormattedDateTime } from "../utils/helper";
 
 ChartJS.register(
   CategoryScale,
@@ -59,7 +58,7 @@ function ChartGroup({ sensorType, sensorData }) {
     return <p style={{ color: "white" }}>No data available for charts</p>;
   }
 
-  const labels = sensorData.map((d) => formatTimestamp(d.time));
+  const labels = sensorData.map((d) => getFormattedDateTime(d.time));
   const datasets = generateChartData(sensorType, sensorData);
   const chartConfig = { labels, datasets };
 

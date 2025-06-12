@@ -1,10 +1,10 @@
 /** @format */
- 
+
 // Api.js
 import axios from "axios";
- 
+
 const BASE_URL = process.env.REACT_APP_API_BASE;
- 
+
 export const fetchPastData = async (sensorType) => {
   try {
     const res = await axios.get(
@@ -16,7 +16,7 @@ export const fetchPastData = async (sensorType) => {
     return [];
   }
 };
- 
+
 export const fetchLiveData = async (sensorType) => {
   try {
     const url = `${BASE_URL}/api/sensor_data?sensortype=${sensorType}`;
@@ -28,7 +28,7 @@ export const fetchLiveData = async (sensorType) => {
     return [];
   }
 };
- 
+
 export const fetchGpsData = async () => {
   try {
     const url = `${BASE_URL}/api/sensor_data?sensortype=gps`;
@@ -36,6 +36,16 @@ export const fetchGpsData = async () => {
     return res.data.map(({ lat, lng, time }) => ({ lat, lng, time }));
   } catch (error) {
     console.info("Error fetching GPS data", error);
+    return [];
+  }
+};
+
+export const fetchProcessedData = async () => {
+  try {
+    const res = await axios.get(`${BASE_URL}/api/processed_data`);
+    return res.data;
+  } catch (error) {
+    console.info("Error fetching processed data", error);
     return [];
   }
 };

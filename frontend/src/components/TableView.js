@@ -1,14 +1,15 @@
 /** @format */
 
-import React from "react";
-import { formatTimestamp } from "../utils/helper";
+import { getFormattedDateTime } from "../utils/helper";
 
 function TableView({ data }) {
   if (!data || data.length === 0 || !data[0]) {
     return <p style={{ color: "white" }}>No Data Available</p>;
   }
 
+  // Ensure 'id' is first in column order
   const keys = Object.keys(data[0]);
+  const orderedKeys = ["id", ...keys.filter((key) => key !== "id")];
 
   return (
     <div style={{ overflowX: "auto" }}>
@@ -16,7 +17,7 @@ function TableView({ data }) {
         style={{ width: "100%", borderCollapse: "collapse", color: "white" }}>
         <thead>
           <tr>
-            {keys.map((key) => (
+            {orderedKeys.map((key) => (
               <th
                 key={key}
                 style={{ border: "1px solid white", padding: "8px" }}>
@@ -28,12 +29,13 @@ function TableView({ data }) {
         <tbody>
           {data.map((row, i) => (
             <tr key={i}>
-              {keys.map((key) => (
+              {orderedKeys.map((key) => (
                 <td
                   key={key}
                   style={{ border: "1px solid white", padding: "8px" }}>
-                  {key.toLowerCase() === "time"
-                    ? formatTimestamp(row[key])
+                  {key.toLowerCase() === "time" ||
+                  key.toLowerCase() === "timestamp"
+                    ? getFormattedDateTime(row[key])
                     : row[key]}
                 </td>
               ))}

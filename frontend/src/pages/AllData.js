@@ -3,11 +3,11 @@
 import React from "react";
 import TableView from "../components/TableView";
 
-function AllData({ sensorData }) {
+function AllData({ data, title }) {
   return (
     <div>
-      <h2>All Data</h2>
-      <TableView data={sensorData} />
+      <h2>{title}</h2>
+      <TableView data={data} />
     </div>
   );
 }
