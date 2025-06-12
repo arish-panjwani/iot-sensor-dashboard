@@ -1,19 +1,26 @@
 /** @format */
  
+// Dashboard.js
+import { useEffect, useState } from "react";
 import ChartGroup from "../components/ChartGroup";
 import MapView from "../components/MapView";
+import { fetchGpsData } from "../utils/api"; // adjust path as needed
  
 function Dashboard({ sensorType, sensorData }) {
-  //gps dummy data for testing
-  const gpsData = [
-    {
-      time: "2025-06-07T03:40:04.097Z",
-      lat: 43.722950802404384,
-      lng: -79.30911610825535,
-    },
-  ];
+  const [gpsData, setGpsData] = useState([]);
  
   const isMap = sensorType === "gps";
+ 
+  useEffect(() => {
+    if (isMap) {
+      const getGps = async () => {
+        const data = await fetchGpsData();
+        setGpsData(data);
+      };
+      getGps();
+    }
+  }, [isMap, sensorType]);
+ 
   const mapStyle = isMap
     ? {
         justifyContent: "center",

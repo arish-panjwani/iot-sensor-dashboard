@@ -1,108 +1,98 @@
 /** @format */
  
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SensorDropdown from "./components/SensorDropdown";
 import Dashboard from "./pages/Dashboard";
 import AllData from "./pages/AllData";
 import mockSensorData from "./mockData";
 import generateLiveData from "./utils/generateLiveData";
-import "./App.css";
-import SegmentedTabs from "./components/SegmentedTabs"; // at the top
 import { fetchPastData, fetchLiveData } from "./utils/api";
+import SegmentedTabs from "./components/SegmentedTabs";
+import "./App.css";
  
 function App() {
   const [sensorType, setSensorType] = useState("accelerometer");
   const [isLive, setIsLive] = useState(false);
-  const [liveData, setLiveData] = useState(generateLiveData("accelerometer")); // ✅ initialize with default
+  const [useMockAPI, setUseMockAPI] = useState(true);
+  const [sensorData, setSensorData] = useState([]);
  
-  // 🔁 Live Data Generator — runs on sensor change or live toggle
+  // Handle Mock + Live data scenarios
   useEffect(() => {
-    if (!isLive) return;
+    let interval;
  
-    // Generate first batch immediately when sensor changes
-    setLiveData(generateLiveData(sensorType));
- 
-    // Then set interval
-    const interval = setInterval(() => {
-      const newData = generateLiveData(sensorType);
-      setLiveData(newData);
-    }, 2000);
- 
-    // Clear interval on unmount or sensorType/isLive change
-    return () => clearInterval(interval);
-  }, [isLive, sensorType]);
- 
-  const handleSwitchChange = () => setIsLive((prev) => !prev);
- 
-  // 🔄 Select live or static data dynamically
-  const sensorData = isLive ? liveData : mockSensorData[sensorType];
- 
-  // For PAST (static) data
-  useEffect(() => {
-    if (isLive) return;
- 
-    const getPastData = async () => {
-      const data = await fetchPastData(sensorType);
-      setLiveData(data);
+    const fetchData = async () => {
+      try {
+        if (useMockAPI) {
+          const data = generateLiveData(sensorType);
+          setSensorData(data);
+        } else {
+          const data = await fetchLiveData(sensorType);
+          console.info("Live data fetched:", data);
+          setSensorData(data);
+        }
+      } catch (error) {
+        console.error("Error fetching live data:", error);
+        setSensorData([]);
+      }
     };
  
-    getPastData();
-  }, [sensorType, isLive]);
- 
-  // For LIVE data (poll every 2 seconds)
-  useEffect(() => {
-    if (!isLive) return;
- 
-    const interval = setInterval(async () => {
-      const data = await fetchLiveData(sensorType);
-      setLiveData(data);
-    }, 2000);
+    if (isLive) {
+      fetchData(); // first fetch
+      interval = setInterval(fetchData, 2000);
+    } else {
+      (async () => {
+        try {
+          if (useMockAPI) {
+            setSensorData(mockSensorData[sensorType]);
+          } else {
+            const data = await fetchPastData(sensorType);
+            setSensorData(data);
+          }
+        } catch (error) {
+          console.error("Error fetching past data:", error);
+          setSensorData([]);
+        }
+      })();
+    }
  
     return () => clearInterval(interval);
-  }, [sensorType, isLive]);
+  }, [sensorType, isLive, useMockAPI]);
  
   return (
     <Router>
       <div className="App">
         <h1>IoT Sensor Dashboard</h1>
  
-        {/* Dropdown + Live Toggle */}
+        {/* Top-right corner switches */}
+        <div className="top-controls">
+          <label className="toggle-switch">
+            <span>Use Mock Data</span>
+            <input
+              type="checkbox"
+              checked={useMockAPI}
+              onChange={() => setUseMockAPI((prev) => !prev)}
+            />
+          </label>
+          <label className="toggle-switch">
+            <span>Show Live Data</span>
+            <input
+              type="checkbox"
+              checked={isLive}
+              onChange={() => setIsLive((prev) => !prev)}
+            />
+          </label>
+        </div>
+ 
+        {/* Sensor Selector */}
         <div className="control-bar">
           <SensorDropdown
             selectedSensor={sensorType}
             setSelectedSensor={setSensorType}
           />
-          <label className="live-toggle">
-            <span>Show Live Data</span>
-            <input
-              type="checkbox"
-              style={{ width: "25px", height: "25px" }}
-              checked={isLive}
-              onChange={handleSwitchChange}
-            />
-          </label>
         </div>
  
-        {/* Navigation */}
-        {/* <div
-          style={{
-            margin: "20px 0",
-            textAlign: "center",
-            fontSize: "1.8em",
-            fontFamily: "Arial, sans-serif",
-            fontWeight: "bold",
-            padding: "10px",
-            borderRadius: "5px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            transition: "background-color 0.3s ease",
-            cursor: "pointer",
-          }}>
-          <nav>
-            <Link to="/">Dashboard</Link> || <Link to="/data">All Data</Link>
-          </nav>
-        </div> */}
- 
+        {/* Navigation Tabs */}
         <SegmentedTabs
           tabs={[
             { label: "Dashboard", path: "/" },
@@ -110,22 +100,14 @@ function App() {
           ]}
         />
  
-        {/* Routes */}
         <Routes>
           <Route
             path="/"
             element={
-              // <Dashboard sensorType={sensorType} sensorData={sensorData} />
-              <Dashboard sensorData={liveData} sensorType={sensorType} />
+              <Dashboard sensorType={sensorType} sensorData={sensorData} />
             }
           />
-          <Route
-            path="/data"
-            element={
-              // <AllData sensorData={sensorData} />
-              <AllData sensorData={liveData} />
-            }
-          />
+          <Route path="/data" element={<AllData sensorData={sensorData} />} />
         </Routes>
       </div>
     </Router>
@@ -133,3 +115,4 @@ function App() {
 }
  
 export default App;
+ 

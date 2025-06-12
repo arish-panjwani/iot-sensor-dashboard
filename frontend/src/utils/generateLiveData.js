@@ -50,6 +50,16 @@ const generateLiveData = (sensorType) => {
     ];
   }
 
+  if (sensorType === "gps") {
+    return [
+      {
+        time,
+        lat: 43.722950802404384,
+        lng: -19.30911610825535,
+      },
+    ];
+  }
+
   return [];
 };
 
